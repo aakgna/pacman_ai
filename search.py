@@ -112,7 +112,27 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #util.raiseNotDefined()
+
+    fringe_queue = util.Queue()
+    visited = set()
+    fringe_queue.push(((problem.getStartState()), []))
+    visited.add(problem.getStartState())
+
+    while not fringe_queue.isEmpty():
+        current_state, path = fringe_queue.pop()
+
+        if problem.isGoalState(current_state):
+            return path
+        
+        #if current_state not in visited:
+            #visited.add(current_state)
+        for successor, action, cost_of_action in problem.getSuccessors(current_state):
+            if successor not in visited:
+                visited.add(successor)
+                fringe_queue.push((successor, path + [action]))
+
+    return []
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
@@ -145,7 +165,7 @@ def nullHeuristic(state, problem=None) -> float:
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-        queue = util.PriorityQueue()
+    queue = util.PriorityQueue()
     start_state = problem.getStartState()
     queue.push((start_state, []), heuristic(start_state, problem))
     best_g = {start_state: 0}

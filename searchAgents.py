@@ -301,12 +301,25 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
+
+        if not isinstance(state, tuple):
+            return False
         pos, unvisit = state
         if pos in unvisit:
             unvisit = list(unvisit)
             unvisit.remove(pos)
             unvisit = tuple(unvisit)
         return len(unvisit) == 0
+        """
+        pos, unvisit = state
+        if pos in unvisit:
+            unvisit = list(unvisit)
+            unvisit.remove(pos)
+            unvisit = tuple(unvisit)
+        return len(unvisit) == 0
+        
+        #return (state[1][0] and state[1][1] and state[1][2] and state[1][3])
+        """
 
     def getSuccessors(self, state: Any):
         """
@@ -365,10 +378,61 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    # "*** YOUR CODE HERE ***"
 
-    "*** YOUR CODE HERE ***"
+    curr, unvisited = state
+    
+    if len(unvisited) == 0:
+        return 0
+    
+    else: 
+        #Manhattan distance --> A* search
+
+        distances = []
+        for corner in unvisited:
+
+            #makes sure that the ansewer is nonnegative//admissable
+            dx = abs(curr[0] - corner[0])
+            dy = abs(curr[1] - corner[1])
+
+            distances.append(dx + dy)
+    
+    return max(distances)
+
+    """
+    position = state[0]
+    unvisited_corners = list(state[1])  # Convert to list for easier manipulation
+    
+    if len(unvisited_corners) == 0:
+        return 0
+    
+    # Initialize heuristic value
+    total_distance = 0
+    current_pos = position
+    
+    # While there are still corners to visit
+    while unvisited_corners:
+        # Find distances to all remaining corners
+        distances = []
+        for corner in unvisited_corners:
+            dx = abs(current_pos[0] - corner[0])
+            dy = abs(current_pos[1] - corner[1])
+            manhattan_dist = dx + dy
+            distances.append((manhattan_dist, corner))
+        
+        # Find the closest corner
+        min_dist, closest_corner = min(distances)
+        
+        # Add the distance to our total
+        total_distance += min_dist
+        
+        # Update for next iteration
+        current_pos = closest_corner
+        unvisited_corners.remove(closest_corner)
+    
+    return total_distance
+    """
     return 0 # Default to trivial solution
-
 
 
 class AStarCornersAgent(SearchAgent):

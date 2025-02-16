@@ -506,26 +506,17 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     
     if len(food_list) == 0:
         return 0
-        
-    # If we have food dots left, compute:
-    # 1. Distance to closest food
-    # 2. Maximum distance between any two food dots
     
     distances = []
     for food1 in food_list:
-        # Distance from current position to this food
         dist = mazeDistance(position, food1, problem.startingGameState)
         distances.append(dist)
         
-        # Distances between food dots
         for food2 in food_list:
-            if food1 < food2:  # avoid computing same pairs twice
+            if food1 < food2:
                 dist = mazeDistance(food1, food2, problem.startingGameState)
                 distances.append(dist)
                 
-    # We must at least:
-    # 1. Get to the nearest food
-    # 2. Cover the maximum distance between any food dots
     return max(distances) if distances else 0
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -534,7 +525,7 @@ class ClosestDotSearchAgent(SearchAgent):
         self.actions = []
         currentState = state
         while(currentState.getFood().count() > 0):
-            nextPathSegment = self.findPathToClosestDot(currentState) # The missing piece
+            nextPathSegment = self.findPathToClosestDot(currentState)
             self.actions += nextPathSegment
             for action in nextPathSegment:
                 legal = currentState.getLegalActions()
@@ -550,14 +541,13 @@ class ClosestDotSearchAgent(SearchAgent):
         Returns a path (a list of actions) to the closest dot, starting from
         gameState.
         """
-        # Here are some useful elements of the startState
         startPosition = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-        
-        # Use BFS to find shortest path to closest food
+
         return search.bfs(problem)
+        
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
     A search problem for finding a path to any food.

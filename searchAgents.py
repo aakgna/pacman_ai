@@ -461,7 +461,10 @@ class FoodSearchProblem:
         return self.start
 
     def isGoalState(self, state):
-        return state[1].count() == 0
+        if isinstance(state, tuple):
+            return state[1].count() == 0
+        else:
+            return False
 
     def getSuccessors(self, state):
         "Returns successor states, the actions they require, and a cost of 1."
@@ -498,32 +501,32 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
-    """
-    Your heuristic for the FoodSearchProblem goes here.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your search may have a but our your heuristic is not admissible!  On the
-    other hand, inadmissible heuristics may find optimal solutions, so be careful.
-
-    The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a Grid
-    (see game.py) of either True or False. You can call foodGrid.asList() to get
-    a list of food coordinates instead.
-
-    If you want access to info like walls, capsules, etc., you can query the
-    problem.  For example, problem.walls gives you a Grid of where the walls
-    are.
-
-    If you want to *store* information to be reused in other calls to the
-    heuristic, there is a dictionary called problem.heuristicInfo that you can
-    use. For example, if you only want to count the walls once and store that
-    value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
-    Subsequent calls to this heuristic can access
-    problem.heuristicInfo['wallCount']
-    """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
-
+    food_list = foodGrid.asList()
+    
+    if len(food_list) == 0:
+        return 0
+        
+    # If we have food dots left, compute:
+    # 1. Distance to closest food
+    # 2. Maximum distance between any two food dots
+    
+    distances = []
+    for food1 in food_list:
+        # Distance from current position to this food
+        dist = mazeDistance(position, food1, problem.startingGameState)
+        distances.append(dist)
+        
+        # Distances between food dots
+        for food2 in food_list:
+            if food1 < food2:  # avoid computing same pairs twice
+                dist = mazeDistance(food1, food2, problem.startingGameState)
+                distances.append(dist)
+                
+    # We must at least:
+    # 1. Get to the nearest food
+    # 2. Cover the maximum distance between any food dots
+    return max(distances) if distances else 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -552,10 +555,9 @@ class ClosestDotSearchAgent(SearchAgent):
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        
+        # Use BFS to find shortest path to closest food
+        return search.bfs(problem)
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
     A search problem for finding a path to any food.
@@ -590,6 +592,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        return self.food[x][y]
         util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
